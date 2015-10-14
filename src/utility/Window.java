@@ -24,7 +24,7 @@ public class Window extends JFrame {
 		setTitle(title);
 		setBounds(100, 100, mat.cols(), mat.rows());
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		originalImage = image = new Mat2Image().getImage(mat);
+		originalImage = image = ConverterTools.Mat2Image(mat);
 		addListeners();
 	}
 	
@@ -32,7 +32,7 @@ public class Window extends JFrame {
 		setTitle(title);
 		setBounds(posX, posY, width, height);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		originalImage = image = new Mat2Image().getImage(mat);
+		originalImage = image = ConverterTools.Mat2Image(mat);
 		addListeners();
 	}
 	

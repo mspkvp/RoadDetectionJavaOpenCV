@@ -8,13 +8,13 @@ package utility;
 
 import java.awt.image.BufferedImage;
 
+import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.videoio.VideoCapture;
 
 public class VideoCap {
 
     VideoCapture cap;
-    Mat2Image mat2Img = new Mat2Image();
 
     public VideoCap(){
         cap = new VideoCapture();
@@ -31,5 +31,9 @@ public class VideoCap {
     	Mat capture = new Mat();
         cap.read(capture);
         return capture;
+    }
+    
+    static {
+    	System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
     }
 }
