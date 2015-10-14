@@ -1,7 +1,10 @@
 package utility;
 
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
 
+import org.opencv.core.Core;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
 
@@ -31,8 +34,11 @@ public class ConverterTools {
 	}
 	
 	public static Mat Image2Mat(BufferedImage image){
-		return null;
-		
+		Mat mat = new Mat(image.getHeight(), image.getWidth(), CvType.CV_8UC3);
+		byte[] pixels = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
+		mat.put(0, 0, pixels);
+		Imgproc.cvtColor(mat, mat, Imgproc.COLOR_RGB2BGR);
+		return mat;
 	}
 	
 	public static Mat getGrayscale(Mat mat){
@@ -40,4 +46,19 @@ public class ConverterTools {
     	Imgproc.cvtColor(mat, result, Imgproc.COLOR_BGR2GRAY);
     	return result;
     }
+	
+	static {
+    	System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+    }
+	
+	/*public static void main(String[] args){
+		Mat mat = Imgcodecs.imread("Horario.png");
+		Window win = new Window("original", mat);
+		win.setVisible(true);
+		
+		Mat mat2 = ConverterTools.Image2Mat(ConverterTools.Mat2Image(mat));
+		Window wind = new Window("converted", mat2);
+		wind.setVisible(true);
+		
+	}*/
 }

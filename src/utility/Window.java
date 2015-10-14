@@ -6,10 +6,13 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
+import java.nio.file.Paths;
 
 import javax.swing.JFrame;
 
+import org.opencv.core.Core;
 import org.opencv.core.Mat;
+import org.opencv.imgcodecs.Imgcodecs;
 
 public class Window extends JFrame {
 
@@ -17,22 +20,22 @@ public class Window extends JFrame {
 	 * 
 	 */
 	private static final long serialVersionUID = -909513795392329876L;
-	private BufferedImage image, originalImage;
+	private BufferedImage image;
 	private JFrame thisWindow = this;
 
 	public Window(String title, Mat mat){
 		setTitle(title);
-		setBounds(100, 100, mat.cols(), mat.rows());
+		setBounds(100, 100, mat.cols()+15, mat.rows()+40);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		originalImage = image = ConverterTools.Mat2Image(mat);
+		image = ConverterTools.Mat2Image(mat);
 		addListeners();
 	}
 	
 	public Window(String title, Mat mat, int posX, int posY, int width, int height){
 		setTitle(title);
-		setBounds(posX, posY, width, height);
+		setBounds(posX, posY, width+15, height+40);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		originalImage = image = ConverterTools.Mat2Image(mat);
+		image = ConverterTools.Mat2Image(mat);
 		addListeners();
 	}
 	
@@ -42,15 +45,6 @@ public class Window extends JFrame {
 	}
 	
 	private void addListeners(){
-		// resize image upon window resizing
-		getRootPane().addComponentListener(new ComponentAdapter() {
-            public void componentResized(ComponentEvent e) {
-            	// Calculate proportional measures
-            	resize();
-            	thisWindow.repaint();
-            }
-        });
-		
 		addKeyListener(new KeyListener() {
 			@Override
 			public void keyTyped(KeyEvent e) {
@@ -83,37 +77,17 @@ public class Window extends JFrame {
 		this.image = image;
 	}
 
-	public void resize() {
-		int finalw = 1, finalh = 1; 
-		
-		if (originalImage.getWidth() > thisWindow.getWidth()) {
-		    //scale width to fit
-		    finalw = thisWindow.getWidth();
-		    //scale height to maintain aspect ratio
-		    finalh = (finalw * originalImage.getHeight()) / originalImage.getWidth();
-		}
-
-		// then check if we need to scale even with the new height
-		if (originalImage.getHeight() > thisWindow.getHeight()) {
-		    //scale height to fit instead
-		    finalh = thisWindow.getHeight();
-		    //scale width to maintain aspect ratio
-		    finalw = (finalh * originalImage.getWidth()) / originalImage.getHeight();
-		}
-		
-		BufferedImage newImg = new BufferedImage(thisWindow.getWidth(), thisWindow.getHeight(), BufferedImage.TYPE_INT_RGB);
-		Graphics g = newImg.createGraphics();
-		g.drawImage(originalImage, 0, 0, finalw, finalh, null);
-		g.dispose();
-		image = newImg;
-	}
-	
 	public static void main(String [] args) throws InterruptedException{
 		// Webcam Viewer
-		VideoCap vidcap = new VideoCap();
+		/*VideoCap vidcap = new VideoCap();
 		Window wind = new Window("Test", vidcap.getOneFrameMat());
 		UpdateViewThread updt = new UpdateViewThread(wind, vidcap);
 		updt.start();
-		wind.setVisible(true);
-	}	
+		wind.setVisible(true);*/
+		
+	}
+	
+	static {
+    	System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+    }
 }
