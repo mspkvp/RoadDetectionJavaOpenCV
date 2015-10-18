@@ -20,7 +20,7 @@ public class VideoCap {
         cap = new VideoCapture();
         cap.open(0);
     } 
-    
+
     public BufferedImage getOneFrame(boolean edge_detection) {
     	Mat capture = new Mat();
         cap.read(capture);

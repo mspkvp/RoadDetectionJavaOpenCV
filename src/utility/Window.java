@@ -79,11 +79,11 @@ public class Window extends JFrame {
 
 	public static void main(String [] args) throws InterruptedException{
 		// Webcam Viewer
-		/*VideoCap vidcap = new VideoCap();
+		VideoCap vidcap = new VideoCap();
 		Window wind = new Window("Test", vidcap.getOneFrameMat());
 		UpdateViewThread updt = new UpdateViewThread(wind, vidcap);
 		updt.start();
-		wind.setVisible(true);*/
+		wind.setVisible(true);
 		
 	}
 	

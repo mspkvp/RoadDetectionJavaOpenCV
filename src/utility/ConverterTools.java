@@ -11,6 +11,8 @@ import org.opencv.imgproc.Imgproc;
 public class ConverterTools {
 	
 	public static BufferedImage Mat2Image(Mat mat){
+		if( mat.empty() ) throw new NullPointerException();
+		
 		BufferedImage img;
 		byte[] dat;
 		int w = mat.cols(), h = mat.rows();
@@ -18,14 +20,13 @@ public class ConverterTools {
 		
 		if(mat.channels() == 1){
     		dat = new byte[w * h];
-        	imgType = BufferedImage.TYPE_BYTE_GRAY;
+        	imgType = BufferedImage.TYPE_BYTE_GRAY;	
         }
         else {
         	dat = new byte[w * h * 3];
         	imgType = BufferedImage.TYPE_3BYTE_BGR;
+    		Imgproc.cvtColor(mat, mat, Imgproc.COLOR_RGB2BGR);
         }
-		
-		Imgproc.cvtColor(mat, mat, Imgproc.COLOR_RGB2BGR);
 		
 		img = new BufferedImage(w, h, imgType);
 		mat.get(0, 0, dat);
