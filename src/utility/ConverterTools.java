@@ -2,16 +2,11 @@ package utility;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
-import java.util.Arrays;
 
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import org.opencv.core.MatOfFloat;
-import org.opencv.core.MatOfInt;
-import org.opencv.core.Point;
-import org.opencv.core.Scalar;
-import org.opencv.core.Size;
+import org.opencv.imgproc.CLAHE;
 import org.opencv.imgproc.Imgproc;
 
 public class ConverterTools {
@@ -53,6 +48,21 @@ public class ConverterTools {
     	Imgproc.cvtColor(mat, result, Imgproc.COLOR_BGR2GRAY);
     	return result;
     }
+	
+	public static Mat equalize(Mat mat, int type){
+		Mat equalized = new Mat();
+		Imgproc.cvtColor(mat, equalized, Imgproc.COLOR_BGR2GRAY );
+        if( type == 0 )
+        	Imgproc.equalizeHist(equalized, equalized);
+        else {
+        	CLAHE cl = Imgproc.createCLAHE();
+        	cl.setClipLimit(8);
+        	cl.apply(equalized, equalized);
+        	
+        }
+        Imgproc.cvtColor(equalized, equalized, Imgproc.COLOR_GRAY2BGR );
+        return equalized;
+	}
 	
 	static {
     	System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
