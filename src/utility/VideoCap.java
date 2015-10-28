@@ -17,9 +17,18 @@ public class VideoCap {
     VideoCapture cap;
 
     public VideoCap(){
-        cap = new VideoCapture();
-        cap.open(0);
-    } 
+        cap = new VideoCapture();   
+    }
+    
+    public void openDevice(int id){
+    	if(cap.isOpened())
+    		cap.release();
+    	cap.open(id);
+    }
+    
+    public void close(){
+    	cap.release();
+    }
 
     public BufferedImage getOneFrame(boolean edge_detection) {
     	Mat capture = new Mat();

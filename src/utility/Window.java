@@ -22,7 +22,7 @@ public class Window extends JFrame {
 	public Window(String title, Mat mat){
 		setTitle(title);
 		setBounds(100, 100, mat.cols()+15, mat.rows()+40);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		image = ConverterTools.Mat2Image(mat);
 		addListeners();
 	}
@@ -73,6 +73,7 @@ public class Window extends JFrame {
 		this.image = image;
 	}
 
+	/*
 	public static void main(String [] args) throws InterruptedException{
 		// Webcam Viewer
 		VideoCap vidcap = new VideoCap();
@@ -81,7 +82,7 @@ public class Window extends JFrame {
 		updt.start();
 		wind.setVisible(true);
 		
-	}
+	}*/
 	
 	static {
     	System.loadLibrary(Core.NATIVE_LIBRARY_NAME);

@@ -22,5 +22,11 @@ class UpdateViewThread extends Thread {
             	break;
             }
         }  
-    } 
+    }
+	
+	@Override
+	public synchronized void start() {
+		if(w != null && v != null)
+			super.start();
+	}
 }

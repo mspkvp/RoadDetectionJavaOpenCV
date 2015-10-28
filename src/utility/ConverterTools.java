@@ -6,6 +6,8 @@ import java.awt.image.DataBufferByte;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.Size;
+import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.CLAHE;
 import org.opencv.imgproc.Imgproc;
 
@@ -39,7 +41,7 @@ public class ConverterTools {
 		Mat mat = new Mat(image.getHeight(), image.getWidth(), CvType.CV_8UC3);
 		byte[] pixels = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
 		mat.put(0, 0, pixels);
-		Imgproc.cvtColor(mat, mat, Imgproc.COLOR_RGB2BGR);
+		//Imgproc.cvtColor(mat, mat, Imgproc.COLOR_RGB2BGR);
 		return mat;
 	}
 	
@@ -64,18 +66,38 @@ public class ConverterTools {
         return equalized;
 	}
 	
+	public static Mat gaussian(Mat mat){
+		Mat result = new Mat();
+		mat.copyTo(result);
+		Imgproc.GaussianBlur(result, result, new Size(5,5), 0);
+		return result;
+	}
+	
 	static {
     	System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
     }
 	
 	/*public static void main(String[] args){
-		Mat mat = Imgcodecs.imread("Horario.png");
-		Window win = new Window("original", mat);
-		win.setVisible(true);
+		Mat mat = Imgcodecs.imread("noisy.png");
+		Mat blur = new Mat(), gaussian = new Mat(), median = new Mat(), bilateral = new Mat();
 		
-		Mat mat2 = ConverterTools.Image2Mat(ConverterTools.Mat2Image(mat));
-		Window wind = new Window("converted", mat2);
-		wind.setVisible(true);
+		mat.copyTo(blur);
+		Imgproc.blur(blur, blur, new Size(5, 5));
 		
+		mat.copyTo(gaussian);
+		Imgproc.GaussianBlur(gaussian, gaussian, new Size(5,5), 0);
+		
+		mat.copyTo(median);
+		Imgproc.medianBlur(median, median, 3);
+		
+		Mat aux = new Mat();
+		mat.copyTo(aux);
+		Imgproc.bilateralFilter(aux, bilateral, 5, 10.0, 5/2.0);
+		
+		new Window("Original", mat).setVisible(true);
+		new Window("Simple Blur", blur).setVisible(true);
+		new Window("Gaussian Blur", gaussian).setVisible(true);
+		new Window("Median Blur", median).setVisible(true);
+		new Window("Bilateral", bilateral).setVisible(true);
 	}*/
 }
