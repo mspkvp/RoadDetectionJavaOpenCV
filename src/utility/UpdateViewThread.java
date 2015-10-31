@@ -1,6 +1,6 @@
 package utility;
 
-class UpdateViewThread extends Thread {
+public class UpdateViewThread extends Thread {
 	
 	private Window w;
 	private VideoCap v;

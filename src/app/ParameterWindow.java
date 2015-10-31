@@ -32,7 +32,7 @@ import org.opencv.core.Mat;
 
 import net.miginfocom.swing.MigLayout;
 import utility.ConverterTools;
-import utility.HoughLines;
+import utility.UpdateViewThread;
 import utility.VideoCap;
 import utility.Window;
 import javax.swing.LayoutStyle.ComponentPlacement;
@@ -66,12 +66,17 @@ public class ParameterWindow extends JFrame {
 	private JButton btnHoughP;
 	private JButton btnApply;
 	
-	private HoughLines hl;
+	private EdgeDetection ed;
+	private RoadSegmentation rs;
 	private JButton btnCamera;
+	private JButton btnSegmentation;
+	private JButton btnHoughSegm;
+	private JButton btnHoughpSegment;
 	
 	public ParameterWindow() {
 		setResizable(false);
-		hl = new HoughLines();
+		ed = new EdgeDetection();
+		rs = new RoadSegmentation();
 		buildWindow();
 		setVariables();
 	}
@@ -300,14 +305,14 @@ public class ParameterWindow extends JFrame {
 		Actions.setForeground(SystemColor.text);
 		Actions.setBackground(SystemColor.desktop);
 		panel_actionBtns.add(Actions);
-		Actions.setLayout(new MigLayout("", "[131.00]", "[][][][]"));
+		Actions.setLayout(new MigLayout("", "[131.00]", "[][][][][][][]"));
 		
 		btnOriginal = new JButton("Original");
 		btnOriginal.setEnabled(false);
 		btnOriginal.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				showWindow("Original", hl.getOriginal());
+				showWindow("Original", ed.getOriginal());
 			}
 		});
 		btnOriginal.setFont(new Font("Lucida Sans Unicode", Font.PLAIN, 11));
@@ -318,7 +323,7 @@ public class ParameterWindow extends JFrame {
 		btnCanny.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				showWindow("Canny", hl.getCanny());
+				showWindow("Canny", ed.getCanny());
 			}
 		});
 		btnCanny.setFont(new Font("Lucida Sans Unicode", Font.PLAIN, 11));
@@ -329,7 +334,7 @@ public class ParameterWindow extends JFrame {
 		btnHough.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				doHoughLinesNormal();
+				doHougedinesNormal();
 			}
 		});
 		btnHough.setFont(new Font("Lucida Sans Unicode", Font.PLAIN, 11));
@@ -340,41 +345,74 @@ public class ParameterWindow extends JFrame {
 		btnHoughP.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				doHoughLinesProbabilistic();
+				doHougedinesProbabilistic();
 			}
 		});
 		btnHoughP.setFont(new Font("Lucida Sans Unicode", Font.PLAIN, 11));
 		Actions.add(btnHoughP, "cell 0 3,grow");
+		
+		btnSegmentation = new JButton("Segmentation");
+		btnSegmentation.setFont(new Font("Lucida Sans Unicode", Font.PLAIN, 11));
+		btnSegmentation.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				doSegmentation();
+			}
+		});
+		btnSegmentation.setEnabled(false);
+		Actions.add(btnSegmentation, "cell 0 4,grow");
+		
+		btnHoughSegm = new JButton("Hough + Segment");
+		btnHoughSegm.setFont(new Font("Lucida Sans Unicode", Font.PLAIN, 11));
+		btnHoughSegm.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				doHoughSegmentation(false);
+			}
+		});
+		btnHoughSegm.setEnabled(false);
+		Actions.add(btnHoughSegm, "cell 0 5,grow");
+		
+		btnHoughpSegment = new JButton("HoughP + Segment");
+		btnHoughpSegment.setFont(new Font("Lucida Sans Unicode", Font.PLAIN, 11));
+		btnHoughpSegment.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				doHoughSegmentation(true);
+			}
+		});
+		btnHoughpSegment.setEnabled(false);
+		Actions.add(btnHoughpSegment, "cell 0 6,grow");
 	}
 	
 	private void setVariables(){
-		cannyThresholdHigh.setText(Integer.toString(hl.cannyThresholdHigh));
-		cannyThresholdLow.setText(Integer.toString(hl.cannyThresholdLow));
-		houghTreshold.setText(Integer.toString(hl.houghThreshold));
-		houghPminLineLength.setText(Integer.toString(hl.minLineLength));
-		houghPmaxLineGap.setText(Integer.toString(hl.maxLineGap));
-		roiTop.setText(Integer.toString(hl.roiTopClipping));
-		roiBot.setText(Integer.toString(hl.roiBottomClipping));
-		roiLeft.setText(Integer.toString(hl.roiLeftClipping));
-		roiRight.setText(Integer.toString(hl.roiRightClipping));
-		roiClipRatio.setText(Double.toString(hl.roiRatioClipping));
-		gaussianBlurAmount.setText(Integer.toString(hl.gaussianBlurAmount));
-		//claheClipping.setText(Integer.toString(hl.claheClipping));
+		cannyThresholdHigh.setText(Integer.toString(ed.cannyThresholdHigh));
+		cannyThresholdLow.setText(Integer.toString(ed.cannyThresholdLow));
+		houghTreshold.setText(Integer.toString(ed.houghThreshold));
+		houghPminLineLength.setText(Integer.toString(ed.minLineLength));
+		houghPmaxLineGap.setText(Integer.toString(ed.maxLineGap));
+		roiTop.setText(Integer.toString(ed.roiTopClipping));
+		roiBot.setText(Integer.toString(ed.roiBottomClipping));
+		roiLeft.setText(Integer.toString(ed.roiLeftClipping));
+		roiRight.setText(Integer.toString(ed.roiRightClipping));
+		roiClipRatio.setText(Double.toString(ed.roiRatioClipping));
+		gaussianBlurAmount.setText(Integer.toString(ed.gaussianBlurAmount));
+		//claheClipping.setText(Integer.toString(ed.claheClipping));
 	}
 	
 	private void updateVariables(){
-		hl.cannyThresholdHigh = Integer.parseInt(cannyThresholdHigh.getText());
-		hl.cannyThresholdLow = Integer.parseInt(cannyThresholdLow.getText());
-		hl.houghThreshold = Integer.parseInt(houghTreshold.getText());
-		hl.minLineLength = Integer.parseInt(houghPminLineLength.getText());
-		hl.maxLineGap = Integer.parseInt(houghPmaxLineGap.getText());
-		hl.roiTopClipping = Integer.parseInt(roiTop.getText());
-		hl.roiBottomClipping = Integer.parseInt(roiBot.getText());
-		hl.roiLeftClipping = Integer.parseInt(roiLeft.getText());
-		hl.roiRightClipping = Integer.parseInt(roiRight.getText());
-		hl.roiRatioClipping = Double.parseDouble(roiClipRatio.getText());
-		hl.gaussianBlurAmount = Integer.parseInt(gaussianBlurAmount.getText());
-		//hl.claheClipping = Integer.parseInt(claheClipping.getText());
+		ed.cannyThresholdHigh = Integer.parseInt(cannyThresholdHigh.getText());
+		ed.cannyThresholdLow = Integer.parseInt(cannyThresholdLow.getText());
+		ed.houghThreshold = Integer.parseInt(houghTreshold.getText());
+		ed.minLineLength = Integer.parseInt(houghPminLineLength.getText());
+		ed.maxLineGap = Integer.parseInt(houghPmaxLineGap.getText());
+		ed.roiTopClipping = Integer.parseInt(roiTop.getText());
+		ed.roiBottomClipping = Integer.parseInt(roiBot.getText());
+		ed.roiLeftClipping = Integer.parseInt(roiLeft.getText());
+		ed.roiRightClipping = Integer.parseInt(roiRight.getText());
+		ed.roiRatioClipping = Double.parseDouble(roiClipRatio.getText());
+		ed.gaussianBlurAmount = Integer.parseInt(gaussianBlurAmount.getText());
+		//ed.claheClipping = Integer.parseInt(claheClipping.getText());
 		setVariables();
 	}
 	
@@ -386,8 +424,8 @@ public class ParameterWindow extends JFrame {
 		VideoCap vidcap = new VideoCap();
 		vidcap.openDevice(0);
 		Window wind = new Window("Test", vidcap.getOneFrameMat());
-		//UpdateViewThread updt;// = new UpdateViewThread(wind, vidcap);
-		//updt.start();
+		UpdateViewThread updt = new UpdateViewThread(wind, vidcap);
+		updt.start();
 		wind.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent we) {
@@ -402,7 +440,7 @@ public class ParameterWindow extends JFrame {
 		try {
 		    img = ImageIO.read(file);
 		    Mat mat = ConverterTools.Image2Mat(img);
-		    hl.setImage(mat);
+		    ed.setImage(mat);
 		    imageURI.setText(file.getAbsolutePath());
 		    Window w = new Window(file.getName(), mat);
 		    w.setVisible(true);
@@ -416,6 +454,9 @@ public class ParameterWindow extends JFrame {
 		btnOriginal.setEnabled(true);
 		btnHough.setEnabled(true);
 		btnHoughP.setEnabled(true);
+		btnSegmentation.setEnabled(true);
+		btnHoughpSegment.setEnabled(true);
+		btnHoughSegm.setEnabled(true);
 		repaint();
 	}
 	
@@ -426,14 +467,27 @@ public class ParameterWindow extends JFrame {
 		}
 	}
 	
-	private void doHoughLinesNormal(){
-		showWindow("Hough Lines Normal", hl.getNormal());
+	private void doHougedinesNormal(){
+		showWindow("Hough Lines Normal", ed.getNormal(false));
 		enableCannyButton();
 	}
 	
-	private void doHoughLinesProbabilistic(){
-		showWindow("Hough Lines Probabilistic", hl.getProbabilistic());
+	private void doHougedinesProbabilistic(){
+		showWindow("Hough Lines Probabilistic", ed.getProbabilistic(false));
 		enableCannyButton();
 	}
 		
+	private void doSegmentation() {
+		Mat seg = new Mat();
+		ed.getOriginal().copyTo(seg);
+		showWindow("Road Segmentation", rs.findRoad(seg));
+	}
+	
+	private void doHoughSegmentation(boolean probabilistic){
+		if(probabilistic)
+			showWindow("Segmentation + Hough Lines Probabilistic", ed.getProbabilistic(true));
+		else
+			showWindow("Hough Lines Probabilistic", ed.getNormal(true));
+		enableCannyButton();
+	};
 }
