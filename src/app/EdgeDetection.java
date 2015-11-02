@@ -112,7 +112,7 @@ public class EdgeDetection {
 		Line dleft=null, dright=null, dmid=null;
 		double area = Double.MAX_VALUE;
 		System.out.println("L"+lleft.size()+ " R"+lright.size()+" M"+lmid.size());
-		
+	
 		/*
 		 * 2 Approaches for finding the vanishing point:
 		 * + best angle selection from the group
@@ -319,6 +319,7 @@ public class EdgeDetection {
 		{
 			Mat seg = new Mat();
 			original_image.copyTo(seg);
+			show(seg);
 			rs.findRoad(seg).copyTo(img);
 		}
 

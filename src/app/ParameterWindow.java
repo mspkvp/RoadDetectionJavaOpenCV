@@ -58,6 +58,8 @@ public class ParameterWindow extends JFrame {
 	private JTextField roiClipRatio;
 	private JTextField gaussianBlurAmount;
 	private JTextField claheClipping;
+	private JTextField pixelRange;
+	private JTextField pixelOffset;
 	private JTextPane imageURI;
 	
 	private JButton btnOriginal;
@@ -82,7 +84,7 @@ public class ParameterWindow extends JFrame {
 	}
 	
 	private void buildWindow() {
-		setSize(new Dimension(500, 430));
+		setSize(new Dimension(500, 470));
 		setFont(new Font("Lucida Sans Unicode", Font.PLAIN, 12));
 		getContentPane().setFont(new Font("Lucida Sans Unicode", Font.PLAIN, 11));
 		getContentPane().setBackground(SystemColor.desktop);
@@ -284,6 +286,29 @@ public class ParameterWindow extends JFrame {
 		Variables.add(claheClipping, "cell 1 8,alignx center");
 		claheClipping.setColumns(10);
 		
+		/* Road segmentation inputs */
+		JLabel lblPixelOffset = new JLabel("Pixel offset");
+		lblPixelOffset.setForeground(SystemColor.text);
+		lblPixelOffset.setFont(new Font("Lucida Sans Unicode", Font.BOLD, 11));
+		Variables.add(lblPixelOffset, "cell 0 9,alignx trailing");
+		
+		pixelOffset = new JTextField();
+		pixelOffset.setHorizontalAlignment(SwingConstants.RIGHT);
+		pixelOffset.setFont(new Font("Lucida Sans Unicode", Font.PLAIN, 11));
+		Variables.add(pixelOffset, "cell 1 9,alignx center");
+		pixelOffset.setColumns(10);
+		
+		JLabel lblPixelRange = new JLabel("Pixel range");
+		lblPixelRange.setForeground(SystemColor.text);
+		lblPixelRange.setFont(new Font("Lucida Sans Unicode", Font.BOLD, 11));
+		Variables.add(lblPixelRange, "cell 0 10,alignx trailing");
+		
+		pixelRange = new JTextField();
+		pixelRange.setHorizontalAlignment(SwingConstants.RIGHT);
+		pixelRange.setFont(new Font("Lucida Sans Unicode", Font.PLAIN, 11));
+		Variables.add(pixelRange, "cell 1 10,alignx center");
+		pixelRange.setColumns(10);
+		
 		btnApply = new JButton("Apply");
 		btnApply.addMouseListener(new MouseAdapter() {
 			@Override
@@ -291,7 +316,7 @@ public class ParameterWindow extends JFrame {
 				updateVariables();
 			}
 		});
-		Variables.add(btnApply, "cell 1 10,growx");
+		Variables.add(btnApply, "cell 1 11,growx");
 		btnApply.setFont(new Font("Lucida Sans Unicode", Font.PLAIN, 11));
 		
 		JPanel panel_actionBtns = new JPanel();
@@ -398,6 +423,9 @@ public class ParameterWindow extends JFrame {
 		roiClipRatio.setText(Double.toString(ed.roiRatioClipping));
 		gaussianBlurAmount.setText(Integer.toString(ed.gaussianBlurAmount));
 		//claheClipping.setText(Integer.toString(ed.claheClipping));
+		
+		pixelRange.setText(Integer.toString(rs.pixelRange));
+		pixelOffset.setText(Integer.toString(rs.pixelOffset));
 	}
 	
 	private void updateVariables(){
@@ -413,6 +441,16 @@ public class ParameterWindow extends JFrame {
 		ed.roiRatioClipping = Double.parseDouble(roiClipRatio.getText());
 		ed.gaussianBlurAmount = Integer.parseInt(gaussianBlurAmount.getText());
 		//ed.claheClipping = Integer.parseInt(claheClipping.getText());
+		
+		/* Road segmentation vars */
+		rs.roiTopClipping = Integer.parseInt(roiTop.getText());
+		rs.roiBottomClipping = Integer.parseInt(roiBot.getText());
+		rs.roiLeftClipping = Integer.parseInt(roiLeft.getText());
+		rs.roiRightClipping = Integer.parseInt(roiRight.getText());
+		rs.roiRatioClipping = Double.parseDouble(roiClipRatio.getText());
+		rs.pixelOffset = Integer.parseInt(pixelOffset.getText());
+		rs.pixelRange = Integer.parseInt(pixelRange.getText());
+		
 		setVariables();
 	}
 	
