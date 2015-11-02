@@ -16,8 +16,9 @@ import utility.Window;
 
 public class RoadSegmentation {
 	
-	public int pixelOffset;
-	public int pixelRange;
+	public int pixelOffset = 45;
+	public int pixelRange = 40;
+	public int contourNumber = 1;
 	
 	public int roiTopClipping = 30;
 	public int roiBottomClipping = 30;
@@ -25,14 +26,12 @@ public class RoadSegmentation {
 	public int roiRightClipping = 0;
 	public double roiRatioClipping = 0.6;
 	
-	public RoadSegmentation() {
-		pixelOffset = 45;
-		pixelRange = 40;
-	}
+	public RoadSegmentation() {}
 	
-	public RoadSegmentation(int pixelOffset, int pixelRange) {
+	public RoadSegmentation(int pixelOffset, int pixelRange, int contourNumber) {
 		this.pixelOffset = pixelOffset;
 		this.pixelRange = pixelRange;
+		this.contourNumber = contourNumber;
 	}
 	
 	/**
@@ -43,13 +42,11 @@ public class RoadSegmentation {
 	private Mat applyMeanShiftFiltering(Mat mat) {
 		Mat ret = new Mat();
 		Imgproc.pyrMeanShiftFiltering(mat, ret, 20, 40);
-		//Imgproc.pyrMeanShiftFiltering(mat, ret, 10, 50);
-
 		return ret;
 	}
 	
 	/**
-	 * Returns the sample mat of the road.
+	 * Returns the sample matrix of the road.
 	 * @param mat
 	 * @return
 	 */
@@ -77,7 +74,7 @@ public class RoadSegmentation {
 				
 				double[] pixel = matSample.get(i, j);
 				double sat = matHSV.get(i, j)[0];
-				//if pixel is grayish and not white
+				//if pixel is not white and gray
 				if (pixel[0] < 160 && pixel[0] >= (pixel[1]-pixelOffset) && pixel[0] <= (pixel[1]+pixelOffset) && 
 						pixel[0] >= (pixel[2]-pixelOffset) && pixel[0] <= (pixel[2]+pixelOffset))  
 					
@@ -105,7 +102,25 @@ public class RoadSegmentation {
 			add(minRange); add(maxRange);
 		}};
 	}
-
+	/**
+	 * Returns the index of the biggest contour.
+	 * @param contours
+	 * @param hierarchy
+	 * @return
+	 */
+	private int getMaxContourIndex(List<MatOfPoint> contours, Mat hierarchy) {
+		double maxContourH = 0;
+        int maxContourIndex = -1;
+        
+		for (int i = 0; i < contours.size(); i++) {
+        	if (contours.get(i).size().height > maxContourH) {
+        		maxContourH = contours.get(i).size().height;
+        		maxContourIndex = i;
+        	}
+        }
+		return maxContourIndex;
+	}
+	
 	/**
 	 * Draws the biggest found contour on the original mat.
 	 * @param matThresholded
@@ -122,16 +137,12 @@ public class RoadSegmentation {
 		
         Imgproc.findContours(matThresholded, contours, hierarchy, Imgproc.RETR_CCOMP, Imgproc.CHAIN_APPROX_SIMPLE);
     	
-        double maxContourH = 0;
-        int maxContourIndex = -1;
         if (hierarchy.size().height > 0 && hierarchy.size().width > 0) {
-            for (int i = 0; i >= 0; i = (int) hierarchy.get(0, i)[0]) {
-            	if (contours.get(i).size().height > maxContourH) {
-            		maxContourH = contours.get(i).size().height;
-            		maxContourIndex = i;
-            	}
-            }
-            Imgproc.drawContours(mat, contours, maxContourIndex, new Scalar(255, 0, 0), -1);
+        	for (int i = 0; i < contourNumber; i++) {
+        		int maxContourIndex = getMaxContourIndex(contours, hierarchy);
+            	Imgproc.drawContours(mat, contours, maxContourIndex, new Scalar(255, 0, 0), -1);
+            	contours.remove(maxContourIndex);
+        	}
         }
         mat.copyTo(original.col(roiLeftClipping).row(original.height() - (int) (original.height()*roiRatioClipping-roiTopClipping)));
         return original;
@@ -146,37 +157,29 @@ public class RoadSegmentation {
 		Mat original = new Mat();
 		mat.copyTo(original);
 		//clip image to the region of interest
-		Rect roiRect = new Rect(roiLeftClipping, mat.height() - (int) (mat.height()*roiRatioClipping-roiTopClipping), mat.width()-roiRightClipping, (int) (mat.height()*roiRatioClipping-roiTopClipping-roiBottomClipping));
-		System.out.println(roiRatioClipping);
-		mat = new Mat(mat, roiRect);
-		show(mat, "roiRect");
+		Rect roiRect = new Rect(roiLeftClipping, 
+				mat.height() - (int) (mat.height()*roiRatioClipping-roiTopClipping), 
+				mat.width()-roiRightClipping, 
+				(int) (mat.height()*roiRatioClipping-roiTopClipping-roiBottomClipping));
+		mat = new Mat(mat, roiRect);		
 		//apply mean-shift filter
 		mat = applyMeanShiftFiltering(mat);		
-		show(mat, "mean-shift");
 		//get sample matrix of the road
 		Mat matSample = getSampleMat(mat);
-		show(matSample, "sample");
 		//get min and max pixel values of the matrix
 		List<Scalar> minMax = getAvgPixelVals(matSample);
 		Mat matT = new Mat();
-		
 		//image sharpening
 		Mat tmp = new Mat();
 		Imgproc.GaussianBlur(mat, tmp, new Size(0,0), 4);
 		Core.addWeighted(mat, 1.5, tmp, -0.5, 0, mat);
-		
 		//dilation
 		int size = 5;
 		Mat element = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(2*size + 1, 2*size+1));
         Imgproc.dilate(mat, mat, element);
-        
         //create a road mask based on the previously extracted values
 		Core.inRange(mat, minMax.get(0), minMax.get(1), matT);
 		//draw road contour on the original image
-		Mat kernel = Imgproc.getStructuringElement(1, new Size(5,5));
-        Imgproc.morphologyEx(matT, matT, Imgproc.MORPH_CLOSE, kernel);
-		show (matT, "morph");
-		
 		return drawContour(matT, original);
 	}
 	

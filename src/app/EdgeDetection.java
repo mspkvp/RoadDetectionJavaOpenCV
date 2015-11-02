@@ -55,10 +55,10 @@ public class EdgeDetection {
 
 	}	
 
-	public EdgeDetection() { 
+	public EdgeDetection(RoadSegmentation rs) { 
 		original_image = new Mat();
 		canny = new Mat();
-		rs = new RoadSegmentation();
+		this.rs = rs;
 	}
 
 	public EdgeDetection(Mat mat){

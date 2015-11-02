@@ -60,6 +60,7 @@ public class ParameterWindow extends JFrame {
 	private JTextField claheClipping;
 	private JTextField pixelRange;
 	private JTextField pixelOffset;
+	private JTextField contourNumber;
 	private JTextPane imageURI;
 	
 	private JButton btnOriginal;
@@ -77,14 +78,14 @@ public class ParameterWindow extends JFrame {
 	
 	public ParameterWindow() {
 		setResizable(false);
-		ed = new EdgeDetection();
 		rs = new RoadSegmentation();
+		ed = new EdgeDetection(rs);
 		buildWindow();
 		setVariables();
 	}
 	
 	private void buildWindow() {
-		setSize(new Dimension(500, 470));
+		setSize(new Dimension(500, 490));
 		setFont(new Font("Lucida Sans Unicode", Font.PLAIN, 12));
 		getContentPane().setFont(new Font("Lucida Sans Unicode", Font.PLAIN, 11));
 		getContentPane().setBackground(SystemColor.desktop);
@@ -309,6 +310,18 @@ public class ParameterWindow extends JFrame {
 		Variables.add(pixelRange, "cell 1 10,alignx center");
 		pixelRange.setColumns(10);
 		
+		JLabel lblContourNum = new JLabel("Contour Number");
+		lblContourNum.setForeground(SystemColor.text);
+		lblContourNum.setFont(new Font("Lucida Sans Unicode", Font.BOLD, 11));
+		Variables.add(lblContourNum, "cell 0 11,alignx trailing");
+		
+		contourNumber = new JTextField();
+		contourNumber.setHorizontalAlignment(SwingConstants.RIGHT);
+		contourNumber.setFont(new Font("Lucida Sans Unicode", Font.PLAIN, 11));
+		Variables.add(contourNumber, "cell 1 11,alignx center");
+		contourNumber.setColumns(10);
+		
+		
 		btnApply = new JButton("Apply");
 		btnApply.addMouseListener(new MouseAdapter() {
 			@Override
@@ -316,7 +329,7 @@ public class ParameterWindow extends JFrame {
 				updateVariables();
 			}
 		});
-		Variables.add(btnApply, "cell 1 11,growx");
+		Variables.add(btnApply, "cell 1 12,growx");
 		btnApply.setFont(new Font("Lucida Sans Unicode", Font.PLAIN, 11));
 		
 		JPanel panel_actionBtns = new JPanel();
@@ -426,6 +439,7 @@ public class ParameterWindow extends JFrame {
 		
 		pixelRange.setText(Integer.toString(rs.pixelRange));
 		pixelOffset.setText(Integer.toString(rs.pixelOffset));
+		contourNumber.setText(Integer.toString(rs.contourNumber));
 	}
 	
 	private void updateVariables(){
@@ -450,6 +464,7 @@ public class ParameterWindow extends JFrame {
 		rs.roiRatioClipping = Double.parseDouble(roiClipRatio.getText());
 		rs.pixelOffset = Integer.parseInt(pixelOffset.getText());
 		rs.pixelRange = Integer.parseInt(pixelRange.getText());
+		rs.contourNumber = Integer.parseInt(contourNumber.getText());
 		
 		setVariables();
 	}
