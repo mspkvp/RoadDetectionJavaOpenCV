@@ -1,13 +1,7 @@
 package app;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Vector;
-
-import javax.swing.RowFilter.Entry;
 
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -15,7 +9,6 @@ import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
-import org.opencv.imgproc.CLAHE;
 import org.opencv.imgproc.Imgproc;
 
 import utility.Window;
@@ -341,16 +334,16 @@ public class EdgeDetection {
 			//Imgproc.line(img, pt1, pt2, color, 2);
 
 			//middle line
-			if( (theta>Math.toRadians(170) || theta<Math.toRadians(10))){
+			if( (theta>Math.toRadians(160) || theta<Math.toRadians(20))){
 				Line l = new Line(pt1, pt2);
 				lmid.add(l);
 			}
 			//right line
-			else if( (theta>Math.toRadians(115) && theta<Math.toRadians(125))){
+			else if( (theta>Math.toRadians(105) && theta<Math.toRadians(125))){
 				lright.add(new Line(pt1, pt2));
 			}
 			//left line
-			else if( (theta>Math.toRadians(65) && theta<Math.toRadians(75))){
+			else if( (theta>Math.toRadians(55) && theta<Math.toRadians(70))){
 				lleft.add(new Line(pt1, pt2));
 			}
 			//Imgproc.line(img, pt1, pt2, new Scalar(128,255,128), 2);
